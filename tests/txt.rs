@@ -1,8 +1,8 @@
 extern crate ultrastar_txt;
 
 use std::collections::HashMap;
-use std::path::PathBuf;
 use ultrastar_txt::*;
+use url::Url;
 
 // usage:
 //    assert_error_kind!(some_err, ErrorKind::MyErrorType)
@@ -346,6 +346,16 @@ fn relative_line_breaks() {
     assert_eq!(lines[1].rel.unwrap(), 24);
 }
 
+#[test]
+fn remote_url_audio() {
+    let txt = include_str!("txts/remote_url_as_path.txt");
+    let mut header = get_simple_txt_header();
+    header.audio_path = Source::parse("https://www.example.com/Testfile.mp3");
+    assert_eq!(parse_txt_header_str(txt).unwrap(), header);
+    assert_eq!(Source::parse("https://www.example.com/Testfile.mp3"), 
+               Source::Remote(Url::parse("https://www.example.com/Testfile.mp3").unwrap()));
+}
+
 fn get_simple_txt_str() -> &'static str {
     include_str!("txts/simple_txt_with_all_features.txt")
 }
@@ -355,12 +365,12 @@ fn get_simple_txt_header() -> Header {
         artist: String::from("Testartist"),
         title: String::from("Testsong"),
         bpm: 123.0,
-        audio_path: PathBuf::from("Testfile.mp3"),
+        audio_path: Source::parse("Testfile.mp3"),
         gap: Some(666.0),
         relative: Some(false),
-        video_path: Some(PathBuf::from("DLzxrzFCyOs.mp4")),
-        cover_path: Some(PathBuf::from("Cover.jpg")),
-        background_path: Some(PathBuf::from("BG.jpg")),
+        video_path: Some(Source::parse("DLzxrzFCyOs.mp4")),
+        cover_path: Some(Source::parse("Cover.jpg")),
+        background_path: Some(Source::parse("BG.jpg")),
         video_gap: Some(777.0),
         genre: Some(String::from("Music")),
         edition: Some(String::from("Testmusic")),
